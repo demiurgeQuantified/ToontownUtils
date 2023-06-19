@@ -2,8 +2,8 @@ from typing import NamedTuple
 
 from panda3d.core import Vec4
 
-from ToontownUtils.Department import Department
-from ToontownUtils.Body import Body
+from toontown_utils.cog.Department import Department
+from toontown_utils.cog.Body import Body
 
 
 class TemplateCog(NamedTuple):

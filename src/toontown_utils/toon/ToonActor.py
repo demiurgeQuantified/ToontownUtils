@@ -2,8 +2,8 @@ from panda3d.core import NodePath, Vec4
 
 from direct.actor.Actor import Actor
 
-from ToontownUtils.Toon.ToonSpecies import ToonSpecies
-from ToontownUtils.Toon.ToonPart import ToonPart
+from toontown_utils.toon.ToonSpecies import ToonSpecies
+from toontown_utils.toon.ToonPart import ToonPart
 
 
 class ToonActor(Actor):

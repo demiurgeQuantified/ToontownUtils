@@ -5,9 +5,10 @@ A package for Panda3D that aims to streamline the usage of Toontown Online's ass
 CogActors are a layer placed on top of regular Panda3D Actors to make creating and modifying Cog models simple calls.
 To create a CogActor from scratch, a Body tuple must first be created that, at minimum, points to the model of the body
 and the matching heads model.
+
 ```python
-from ToontownUtils.CogActor import CogActor
-from ToontownUtils.Body import Body
+from toontown_utils.cog.CogActor import CogActor
+from toontown_utils.cog.Body import Body
 
 bodyA = Body(model="phase_3.5/models/char/suitA-mod.bam", headsModel="phase_4/models/char/suitA-heads.bam")
 
@@ -33,9 +34,10 @@ things like animations are rarely project specific.
 It provides a dataset based on the original cogs as these are most often all that is needed.
 
 Using CogJSON in your project is much simpler, as every detail of the cog is already defined for you.
+
 ```python
-from ToontownUtils import TemplateManager
-from ToontownUtils.CogActor import CogActor
+from toontown_utils import TemplateManager
+from toontown_utils.cog.CogActor import CogActor
 
 TemplateManager.loadFile("path/to/my.json")
 

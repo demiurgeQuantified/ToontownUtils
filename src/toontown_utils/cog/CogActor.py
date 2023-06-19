@@ -1,9 +1,9 @@
 from panda3d.core import NodePath, Texture
 from direct.actor.Actor import Actor
 
-from ToontownUtils.TemplateCog import *
-from ToontownUtils import CogGlobals
-from ToontownUtils.TemplateManager import Cogs
+from toontown_utils.cog.TemplateCog import *
+from toontown_utils.cog import CogGlobals
+from toontown_utils.TemplateManager import Cogs
 
 
 class CogActor(Actor):

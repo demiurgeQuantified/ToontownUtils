@@ -3,9 +3,9 @@ from typing import Any
 
 from panda3d.core import Vec4
 
-from ToontownUtils.TemplateCog import TemplateCog
-from ToontownUtils.Department import Department, Medallion
-from ToontownUtils.Body import Body, Skelecog
+from toontown_utils.cog.TemplateCog import TemplateCog
+from toontown_utils.cog.Department import Department, Medallion
+from toontown_utils.cog.Body import Body, Skelecog
 
 defaultTextureExtension = "jpg"
 defaultModelExtension = "bam"
