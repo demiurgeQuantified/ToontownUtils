@@ -1,4 +1,4 @@
-from panda3d.core import NodePath, Vec4
+from panda3d.core import NodePath, Vec4, Texture
 
 from direct.actor.Actor import Actor
 
@@ -23,10 +23,16 @@ class ToonActor(Actor):
         self.torso: NodePath = None
         self.legs: NodePath = None
 
-        self.headColor = Vec4(1, 1, 1, 1)
-        self.torsoColor = Vec4(1, 1, 1, 1)
-        self.legsColor = Vec4(1, 0, 0, 1)
-        self.glovesColor = Vec4(1, 1, 1, 1)
+        self._headColor = Vec4(1, 1, 1, 1)
+        self._torsoColor = Vec4(1, 1, 1, 1)
+        self._legsColor = Vec4(1, 0, 0, 1)
+        self._glovesColor = Vec4(1, 1, 1, 1)
+
+        self._topTexture: Texture = None
+        self._sleeveTexture: Texture = None
+        self._bottomTexture: Texture = None
+        self._topColor = Vec4(1, 1, 1, 1)
+        self._bottomColor = Vec4(1, 1, 1, 1)
 
         self.createModel(self.species, self.headType, self.torsoType, self.legsType)
 
@@ -34,10 +40,12 @@ class ToonActor(Actor):
         self.createHead(species.heads)
         self.createTorso(torso.model)
         self.createLegs(legs.model)
+
         self.loadAnims(torso.anims, "torso")
         self.loadAnims(legs.anims, "legs")
         if species.headAnims is not None:
             self.loadAnims(species.headAnims, "head")
+        
         self.reapplyColors()
 
     def createLegs(self, model: str) -> None:
@@ -71,16 +79,29 @@ class ToonActor(Actor):
             self.head.reparentTo(self.torso.find("**/def_head"))
 
     def reapplyColors(self) -> None:
-        for pieceName in ('legs', 'feet'):
-            piece = self.legs.find('**/%s;+s' % pieceName)
+        for pieceName in ("legs", "feet"):
+            piece = self.legs.find(f"**/{pieceName}")
             piece.setColor(self.legsColor)
 
-        for pieceName in ('arms', 'neck'):
-            piece = self.torso.find('**/' + pieceName)
+        for pieceName in ("arms", "neck"):
+            piece = self.torso.find(f"**/{pieceName}")
             piece.setColor(self.torsoColor)
 
-        parts = self.head.findAllMatches('**/head*')
+        parts = self.head.findAllMatches("**/head*")
         parts.setColor(self.headColor)
+
+    def reapplyClothing(self) -> None:
+        top: NodePath = self.torso.find("**/torso-top")
+        top.setTexture(self.topTexture, 1)
+        top.setColor(self.topColor)
+
+        sleeves: NodePath = self.torso.find("**/sleeves")
+        sleeves.setTexture(self.sleeveTexture, 1)
+        sleeves.setColor(self.topColor)
+
+        bottom: NodePath = self.torso.find("**/torso-bot")
+        bottom.setTexture(self.bottomTexture, 1)
+        bottom.setColor(self.bottomColor)
 
     @property
     def species(self) -> ToonSpecies:
@@ -101,8 +122,8 @@ class ToonActor(Actor):
         self._legsColor = color
         if self.legs is None:
             return
-        for pieceName in ('legs', 'feet'):
-            piece = self.legs.find('**/%s;+s' % pieceName)
+        for pieceName in ("legs", "feet"):
+            piece = self.legs.find(f"**/{pieceName}")
             piece.setColor(color)
 
     @property
@@ -114,8 +135,8 @@ class ToonActor(Actor):
         self._torsoColor = color
         if self.torso is None:
             return
-        for pieceName in ('arms', 'neck'):
-            piece = self.torso.find('**/' + pieceName)
+        for pieceName in ("arms", "neck"):
+            piece = self.torso.find(f"**/{pieceName}")
             piece.setColor(color)
 
     @property
@@ -127,7 +148,7 @@ class ToonActor(Actor):
         self._headColor = color
         if self.head is None:
             return
-        self.head.findAllMatches('**/head*').setColor(color)
+        self.head.findAllMatches("**/head*").setColor(color)
 
     @property
     def headType(self) -> str:
@@ -162,3 +183,58 @@ class ToonActor(Actor):
             except KeyError:
                 legs = TemplateManager.Legs["all"][legs]
         self._legsType = legs
+
+    @property
+    def topColor(self) -> Vec4:
+        return self._topColor
+
+    @topColor.setter
+    def topColor(self, color: Vec4) -> None:
+        self._topColor = color
+        for pieceName in ("torso-top", "sleeves"):
+            piece = self.legs.find(f"**/{pieceName}")
+            piece.setColor(color)
+
+    @property
+    def bottomColor(self) -> Vec4:
+        return self._topColor
+
+    @bottomColor.setter
+    def bottomColor(self, color: Vec4) -> None:
+        self._topColor = color
+        piece = self.legs.find("**/torso-bot")
+        piece.setColor(color)
+
+    @property
+    def bottomTexture(self) -> Texture:
+        return self._bottomTexture
+
+    @bottomTexture.setter
+    def bottomTexture(self, tex: Texture | str) -> None:
+        if not isinstance(tex, Texture):
+            tex = loader.loadTexture(tex)
+        self._bottomTexture = tex
+        self.torso.find("**/torso-bot").setTexture(tex, 1)
+
+    @property
+    def topTexture(self) -> Texture:
+        return self._topTexture
+
+    @topTexture.setter
+    def topTexture(self, tex: Texture | str) -> None:
+        if not isinstance(tex, Texture):
+            tex = loader.loadTexture(tex)
+        self._topTexture = tex
+        self.torso.find("**/torso-top").setTexture(tex, 1)
+
+    @property
+    def sleeveTexture(self) -> Texture:
+        return self._sleeveTexture
+
+    @sleeveTexture.setter
+    def sleeveTexture(self, tex: Texture | str) -> None:
+        if not isinstance(tex, Texture):
+            tex = loader.loadTexture(tex)
+        self._sleeveTexture = tex
+        self.torso.find("**/sleeves").setTexture(tex, 1)
+
