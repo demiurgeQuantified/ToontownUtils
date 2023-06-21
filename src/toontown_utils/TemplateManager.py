@@ -240,7 +240,13 @@ def loadAllParts(parts: dict[str, dict[str, dict[str, Any]]]) -> None:
 def loadParts(parts: dict[str, Any], partDict: dict[str, ToonPart]) -> None:
     for part, data in parts.items():
         try:
-            partDict[part] = ToonPart(model=addExtensionIfMissing(data["model"], defaultModelExtension), anims=data["anims"])
+            animations = data.get("anims")
+            if animations is not None:
+                for anim in animations:
+                    animations[anim] = addExtensionIfMissing(animations[anim], defaultModelExtension)
+            else:
+                print(f"WARN: Body {bodyType} has no animations.")
+            partDict[part] = ToonPart(model=addExtensionIfMissing(data["model"], defaultModelExtension), anims=animations)
         except KeyError as e:
             print(f"ToonPart {part} is missing required field {e.args[0]}.")
 

@@ -34,6 +34,10 @@ class ToonActor(Actor):
         self.createHead(species.heads)
         self.createTorso(torso.model)
         self.createLegs(legs.model)
+        self.loadAnims(torso.anims, "torso")
+        self.loadAnims(legs.anims, "legs")
+        if species.headAnims is not None:
+            self.loadAnims(species.headAnims, "head")
         self.reapplyColors()
 
     def createLegs(self, model: str) -> None:
