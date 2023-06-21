@@ -2,17 +2,22 @@ from panda3d.core import NodePath, Vec4
 
 from direct.actor.Actor import Actor
 
+from toontown_utils import TemplateManager
+
 from toontown_utils.toon.ToonSpecies import ToonSpecies
 from toontown_utils.toon.ToonPart import ToonPart
 
 
 class ToonActor(Actor):
-    def __init__(self, species: ToonSpecies = None, head: str = None, torso: str = None, legs: str = None) -> None:
+    def __init__(self, species: ToonSpecies | str = None,
+                 head: str = None, torso: str | ToonPart = None, legs: ToonPart | str = None,
+                 clothingType: str = "skirt", eyelashes: bool = False) -> None:
         Actor.__init__(self)
         self.species: ToonSpecies = species
-        self.headType: str = head
-        self.torsoType: str = torso
-        self.legsType: str = legs
+        self.clothingType = clothingType
+        self.headType = head
+        self.torsoType = torso
+        self.legsType = legs
 
         self.head: NodePath = None
         self.torso: NodePath = None
@@ -22,6 +27,8 @@ class ToonActor(Actor):
         self.torsoColor = Vec4(1, 1, 1, 1)
         self.legsColor = Vec4(1, 0, 0, 1)
         self.glovesColor = Vec4(1, 1, 1, 1)
+
+        self.createModel(self.species, self.headType, self.torsoType, self.legsType)
 
     def createModel(self, species: ToonSpecies, head: str, torso: ToonPart, legs: ToonPart) -> None:
         self.createHead(species.heads)
@@ -72,6 +79,16 @@ class ToonActor(Actor):
         parts.setColor(self.headColor)
 
     @property
+    def species(self) -> ToonSpecies:
+        return self._species
+
+    @species.setter
+    def species(self, species: str | ToonSpecies):
+        if isinstance(species, str):
+            species = TemplateManager.Species[species]
+        self._species = species
+
+    @property
     def legsColor(self) -> Vec4:
         return self._legsColor
 
@@ -117,17 +134,27 @@ class ToonActor(Actor):
         self._headType = head
 
     @property
-    def torsoType(self) -> str:
+    def torsoType(self) -> ToonPart:
         return self._torsoType
 
     @torsoType.setter
-    def torsoType(self, torso: str) -> None:
+    def torsoType(self, torso: str | ToonPart) -> None:
+        if isinstance(torso, str):
+            try:
+                torso = TemplateManager.Torsos[self.clothingType][torso]
+            except KeyError:
+                torso = TemplateManager.Torsos["all"][torso]
         self._torsoType = torso
 
     @property
-    def legsType(self) -> str:
+    def legsType(self) -> ToonPart:
         return self._legsType
 
     @legsType.setter
-    def legsType(self, legs: str) -> None:
+    def legsType(self, legs: str | ToonPart) -> None:
+        if isinstance(legs, str):
+            try:
+                legs = TemplateManager.Legs[self.clothingType][legs]
+            except KeyError:
+                legs = TemplateManager.Legs["all"][legs]
         self._legsType = legs
