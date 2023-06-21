@@ -57,7 +57,7 @@ def loadFile(path: str, schema: str = None) -> bool:
     file.close()
 
     if schema is None:
-        schema = contents.get("schema", None)
+        schema = contents.get("schema")
         if schema == "toonschema.json":
             schema = "toon"
         elif schema == "cogschema.json":
@@ -68,24 +68,24 @@ def loadFile(path: str, schema: str = None) -> bool:
 
     # TODO: split these into their own functions
     if schema == "toon":
-        parts: dict = contents.get("parts", None)
+        parts: dict = contents.get("parts")
         if parts is not None:
             loadAllParts(parts)
 
-        species: dict = contents.get("species", None)
+        species: dict = contents.get("species")
         if species is not None:
             loadSpecies(species)
 
     elif schema == "cog":
-        departments: dict = contents.get("departments", None)
+        departments: dict = contents.get("departments")
         if departments is not None:
             loadDepartments(departments)
 
-        bodies: dict = contents.get("bodies", None)
+        bodies: dict = contents.get("bodies")
         if bodies is not None:
             loadBodies(bodies)
 
-        cogs: dict = contents.get("cogs", None)
+        cogs: dict = contents.get("cogs")
         if cogs is not None:
             loadCogs(cogs)
 
@@ -119,7 +119,7 @@ def loadCogs(cogs: dict[str, Any]) -> None:
             continue
 
         try:
-            headColor: list | Vec4 = data.get("headColor", None)
+            headColor: list | Vec4 = data.get("headColor")
             if headColor is not None:
                 headColor = readColor(headColor)
 
@@ -130,7 +130,7 @@ def loadCogs(cogs: dict[str, Any]) -> None:
             if isinstance(gloveColor, list):
                 gloveColor = readColor(gloveColor)
 
-            headTexture: str = data.get("headTexture", None)
+            headTexture: str = data.get("headTexture")
             if headTexture is not None:
                 headTexture = addExtensionIfMissing(headTexture, defaultTextureExtension)
 
@@ -141,7 +141,7 @@ def loadCogs(cogs: dict[str, Any]) -> None:
                 data["size"],
                 gloveColor,
                 data["head"],
-                head2 = data.get("head2", None),
+                head2 = data.get("head2"),
                 headTexture = headTexture,
                 headColor = headColor
             )
@@ -152,18 +152,18 @@ def loadCogs(cogs: dict[str, Any]) -> None:
 def loadDepartments(depts: dict[str, Any]) -> None:
     for dept, data in depts.items():
         try:
-            gloveColor: list | Vec4 = data.get("gloveColor", None)
+            gloveColor: list | Vec4 = data.get("gloveColor")
             if gloveColor is not None:
                 gloveColor = readColor(gloveColor)
 
-            medallionColor: list | Vec4 = data["medallion"].get("color", None)
+            medallionColor: list | Vec4 = data["medallion"].get("color")
             if medallionColor is not None:
                 medallionColor = readColor(medallionColor)
 
             medallion = Medallion(
                 model=addExtensionIfMissing(data["medallion"]["model"], defaultModelExtension),
                 color=medallionColor,
-                part=data["medallion"].get("part", None)
+                part=data["medallion"].get("part")
             )
 
             Departments[dept] = Department(
@@ -181,22 +181,22 @@ def loadDepartments(depts: dict[str, Any]) -> None:
 def loadBodies(bodies: dict[str, Any]) -> None:
     for bodyType, data in bodies.items():
         try:
-            animations: dict = data.get("animations", None)
+            animations: dict = data.get("animations")
             if animations is not None:
                 for anim in animations:
                     animations[anim] = addExtensionIfMissing(animations[anim], defaultModelExtension)
             else:
                 print(f"WARN: Body {bodyType} has no animations.")
 
-            loseModel: str = data.get("loseModel", None)
+            loseModel: str = data.get("loseModel")
             if loseModel is not None:
                 loseModel = addExtensionIfMissing(loseModel, defaultModelExtension)
 
             skelecog: Skelecog = None
-            skelecogData = data.get("skelecog", None)
+            skelecogData = data.get("skelecog")
             if skelecogData is not None:
                 try:
-                    skeleLoseModel = skelecogData.get("loseModel", None)
+                    skeleLoseModel = skelecogData.get("loseModel")
                     if skeleLoseModel is not None:
                         skeleLoseModel = addExtensionIfMissing(skeleLoseModel, defaultModelExtension)
                     skelecog = Skelecog(
@@ -220,7 +220,7 @@ def loadBodies(bodies: dict[str, Any]) -> None:
 
 
 def loadAllParts(parts: dict[str, dict[str, dict[str, Any]]]) -> None:
-    areaParts = parts.get("legs", None)
+    areaParts = parts.get("legs")
     if areaParts is not None:
         for cat in ("all", "skirt", "shorts"):
             catData = areaParts.get(cat, None)
@@ -228,7 +228,7 @@ def loadAllParts(parts: dict[str, dict[str, dict[str, Any]]]) -> None:
                 continue
             loadParts(catData, Legs[cat])
 
-    areaParts = parts.get("torsos", None)
+    areaParts = parts.get("torsos")
     if areaParts is not None:
         for cat in ("all", "skirt", "shorts"):
             catData = areaParts.get(cat, None)
@@ -254,7 +254,7 @@ def loadParts(parts: dict[str, Any], partDict: dict[str, ToonPart]) -> None:
 def loadSpecies(species: dict[str, dict[str, Any]]):
     for speciesName, data in species.items():
         try:
-            Species[speciesName] = ToonSpecies(heads=addExtensionIfMissing(data["heads"], defaultModelExtension), headAnims=data.get("headAnims", None),
+            Species[speciesName] = ToonSpecies(heads=addExtensionIfMissing(data["heads"], defaultModelExtension), headAnims=data.get("headAnims"),
                                                size=data.get("size", 1))
         except KeyError as e:
             print(f"Species {species} is missing required field {e.args[0]}.")
