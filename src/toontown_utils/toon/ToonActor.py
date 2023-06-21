@@ -24,9 +24,9 @@ class ToonActor(Actor):
         self.glovesColor = Vec4(1, 1, 1, 1)
 
     def createModel(self, species: ToonSpecies, head: str, torso: ToonPart, legs: ToonPart) -> None:
-        self.createHead(species.heads[head])
-        self.createTorso(torso)
-        self.createLegs(legs)
+        self.createHead(species.heads)
+        self.createTorso(torso.model)
+        self.createLegs(legs.model)
         self.reapplyColors()
 
     def createLegs(self, model: str) -> None:

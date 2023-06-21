@@ -7,12 +7,27 @@ from toontown_utils.cog.TemplateCog import TemplateCog
 from toontown_utils.cog.Department import Department, Medallion
 from toontown_utils.cog.Body import Body, Skelecog
 
+from toontown_utils.toon.ToonPart import ToonPart
+from toontown_utils.toon.ToonSpecies import ToonSpecies
+
 defaultTextureExtension = "jpg"
 defaultModelExtension = "bam"
 
 Cogs: dict[str, TemplateCog] = {}
 Departments: dict[str, Department] = {}
 Bodies: dict[str, Body] = {}
+
+Species: dict[str, ToonSpecies] = {}
+Legs: dict[str, dict[str, ToonPart]] = {
+    "all": {},
+    "shorts": {},
+    "skirt": {}
+}
+Torsos: dict[str, dict[str, ToonPart]] = {
+    "all": {},
+    "shorts": {},
+    "skirt": {}
+}
 
 
 def readColor(col: list) -> Vec4:
@@ -25,33 +40,54 @@ def addExtensionIfMissing(tex: str, ext: str) -> str:
     return tex
 
 
-def loadFile(path: str) -> bool:
+def loadFile(path: str, schema: str = None) -> bool:
     try:
         file = open(path, 'r', encoding='utf-8')
     except OSError:
-        print(f"CogLoader ERROR: Failed to open {path}")
+        print(f"TemplateManager ERROR: Failed to open {path}")
         return False
 
     try:
         contents: dict = json.loads(file.read())
     except json.JSONDecodeError:
         file.close()
-        print(f"CogLoader ERROR: {path} is not a valid JSON file.")
+        print(f"TemplateManager ERROR: {path} is not a valid JSON file.")
         return False
 
     file.close()
 
-    departments: dict = contents.get("departments", None)
-    if departments is not None:
-        loadDepartments(departments)
+    if schema is None:
+        schema = contents.get("schema", None)
+        if schema == "toonschema.json":
+            schema = "toon"
+        elif schema == "cogschema.json":
+            schema = "cog"
+        else:
+            print(f"TemplateManager ERROR: Could not auto-detect schema of {path}")
+            return False
 
-    bodies: dict = contents.get("bodies", None)
-    if bodies is not None:
-        loadBodies(bodies)
+    # TODO: split these into their own functions
+    if schema == "toon":
+        parts: dict = contents.get("parts", None)
+        if parts is not None:
+            loadAllParts(parts)
 
-    cogs: dict = contents.get("cogs", None)
-    if cogs is not None:
-        loadCogs(cogs)
+        species: dict = contents.get("species", None)
+        if species is not None:
+            loadSpecies(species)
+
+    elif schema == "cog":
+        departments: dict = contents.get("departments", None)
+        if departments is not None:
+            loadDepartments(departments)
+
+        bodies: dict = contents.get("bodies", None)
+        if bodies is not None:
+            loadBodies(bodies)
+
+        cogs: dict = contents.get("cogs", None)
+        if cogs is not None:
+            loadCogs(cogs)
 
     return True
 
@@ -181,3 +217,38 @@ def loadBodies(bodies: dict[str, Any]) -> None:
             )
         except KeyError as e:
             print(f"Body {bodyType} is missing required field {e.args[0]}.")
+
+
+def loadAllParts(parts: dict[str, dict[str, dict[str, Any]]]) -> None:
+    areaParts = parts.get("legs", None)
+    if areaParts is not None:
+        for cat in ("all", "skirt", "shorts"):
+            catData = areaParts.get(cat, None)
+            if catData is None:
+                continue
+            loadParts(catData, Legs[cat])
+
+    areaParts = parts.get("torsos", None)
+    if areaParts is not None:
+        for cat in ("all", "skirt", "shorts"):
+            catData = areaParts.get(cat, None)
+            if catData is None:
+                continue
+            loadParts(catData, Torsos[cat])
+
+
+def loadParts(parts: dict[str, Any], partDict: dict[str, ToonPart]) -> None:
+    for part, data in parts.items():
+        try:
+            partDict[part] = ToonPart(model=addExtensionIfMissing(data["model"], defaultModelExtension), anims=data["anims"])
+        except KeyError as e:
+            print(f"ToonPart {part} is missing required field {e.args[0]}.")
+
+
+def loadSpecies(species: dict[str, dict[str, Any]]):
+    for speciesName, data in species.items():
+        try:
+            Species[speciesName] = ToonSpecies(heads=addExtensionIfMissing(data["heads"], defaultModelExtension), headAnims=data.get("headAnims", None),
+                                               size=data.get("size", 1))
+        except KeyError as e:
+            print(f"Species {species} is missing required field {e.args[0]}.")
