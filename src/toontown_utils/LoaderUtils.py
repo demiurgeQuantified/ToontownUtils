@@ -1,3 +1,5 @@
+from typing import Any
+
 from panda3d.core import Vec4
 
 defaultTextureExtension = "jpg"
@@ -12,3 +14,8 @@ def addExtensionIfMissing(tex: str, ext: str) -> str:
     if "." not in tex.split("/")[-1]:
         tex = tex + "." + ext
     return tex
+
+
+def addExtensions(data: dict[Any, str], ext: str):
+    for k, v in data.items():
+        data[k] = addExtensionIfMissing(v, ext)

@@ -6,11 +6,12 @@ from toontown_utils import TemplateManager
 
 from toontown_utils.toon.ToonSpecies import ToonSpecies
 from toontown_utils.toon.ToonPart import ToonPart
+from toontown_utils.toon.ToonHead import ToonHead
 
 
 class ToonActor(Actor):
     def __init__(self, species: ToonSpecies | str = None,
-                 head: str = None, torso: str | ToonPart = None, legs: ToonPart | str = None,
+                 head: str | ToonHead = None, torso: str | ToonPart = None, legs: ToonPart | str = None,
                  clothingType: str = "skirt", eyelashes: bool = False) -> None:
         Actor.__init__(self)
         self.species: ToonSpecies = species
@@ -37,44 +38,53 @@ class ToonActor(Actor):
         self.createModel(self.species, self.headType, self.torsoType, self.legsType)
 
     def createModel(self, species: ToonSpecies, head: str, torso: ToonPart, legs: ToonPart) -> None:
-        self.createHead(species.heads)
-        self.createTorso(torso.model)
-        self.createLegs(legs.model)
-
-        self.loadAnims(torso.anims, "torso")
-        self.loadAnims(legs.anims, "legs")
-        if species.headAnims is not None:
-            self.loadAnims(species.headAnims, "head")
+        self.createHead(species.heads[head])
+        self.createTorso(torso)
+        self.createLegs(legs)
         
         self.reapplyColors()
 
-    def createLegs(self, model: str) -> None:
+    def createLegs(self, legsPart: ToonPart) -> None:
         if self.legs is not None:
             self.legs.removeNode()
-        self.loadModel(model, "legs")
+
+        self.loadModel(legsPart.model, "legs")
+        self.loadAnims(legsPart.anims, "legs")
         self.legs = self.getPart("legs")
-        if self.torso is not None:
-            self.torso.reparentTo(self.legs.find("**/joint_hips"))
 
         self.legs.find("**/shoes").stash()
         self.legs.find("**/boots_short").stash()
         self.legs.find("**/boots_long").stash()
 
-    def createTorso(self, model: str) -> None:
+        if self.torso is not None:
+            self.torso.reparentTo(self.legs.find("**/joint_hips"))
+
+    def createTorso(self, torsoPart: ToonPart) -> None:
         if self.torso is not None:
             self.torso.removeNode()
-        self.loadModel(model, "torso")
+
+        self.loadModel(torsoPart.model, "torso")
+        self.loadAnims(torsoPart.anims, "torso")
         self.torso = self.getPart("torso")
+
         if self.legs is not None:
             self.torso.reparentTo(self.legs.find("**/joint_hips"))
         if self.head is not None:
             self.head.reparentTo(self.torso.find("**/def_head"))
 
-    def createHead(self, model: str) -> None:
+    def createHead(self, head: ToonHead) -> None:
         if self.head is not None:
             self.head.removeNode()
-        self.loadModel(model, "head")
-        self.head = self.getPart("head")
+
+        self.loadModel(head.model, "head")
+        if head.anims is not None:
+            self.loadAnims(head.anims, "head")
+        self.head: NodePath = self.getPart("head")
+
+        if head.parts is not None:
+            self.head.getChildren()[0].getChildren().stash()
+            for part in head.parts:
+                self.head.find(f"**/{part};+s").unstash()
         if self.torso is not None:
             self.head.reparentTo(self.torso.find("**/def_head"))
 

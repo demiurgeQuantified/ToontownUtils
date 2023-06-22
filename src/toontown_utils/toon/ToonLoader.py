@@ -3,6 +3,7 @@ from typing import Any
 from toontown_utils import LoaderUtils
 from toontown_utils.toon.ToonPart import ToonPart
 from toontown_utils.toon.ToonSpecies import ToonSpecies
+from toontown_utils.toon.ToonHead import ToonHead
 
 Species: dict[str, ToonSpecies] = {}
 Legs: dict[str, dict[str, ToonPart]] = {
@@ -50,8 +51,7 @@ def loadParts(parts: dict[str, Any], partDict: dict[str, ToonPart]) -> None:
         try:
             animations = data.get("anims")
             if animations is not None:
-                for anim in animations:
-                    animations[anim] = LoaderUtils.addExtensionIfMissing(animations[anim], LoaderUtils.defaultModelExtension)
+                LoaderUtils.addExtensions(animations, LoaderUtils.defaultModelExtension)
             else:
                 print(f"WARN: ToonPart {part} has no animations.")
             partDict[part] = ToonPart(
@@ -64,9 +64,39 @@ def loadParts(parts: dict[str, Any], partDict: dict[str, ToonPart]) -> None:
 def loadSpecies(species: dict[str, dict[str, Any]]):
     for speciesName, data in species.items():
         try:
+            heads: dict[str, ToonHead] = {}
+            for head, headData in data["heads"].items():
+                try:
+                    heads[head] = loadHead(headData)
+                except KeyError as e:
+                    print(f"{speciesName} head {head} is missing required field {e.args[0]}.")
+
+
             Species[speciesName] = ToonSpecies(
-                heads=LoaderUtils.addExtensionIfMissing(data["heads"], LoaderUtils.defaultModelExtension),
-                headAnims=data.get("headAnims"),  # TODO: add extensions
-                size=data.get("size", 1))
+                heads=heads,
+                size=data.get("size", 1)
+            )
         except KeyError as e:
             print(f"Species {species} is missing required field {e.args[0]}.")
+
+
+def loadHead(data: dict[str, Any]) -> ToonHead:
+        muzzles = data["muzzles"]
+        LoaderUtils.addExtensions(muzzles, LoaderUtils.defaultModelExtension)
+
+        anims = data.get("anims")
+        if anims is not None:
+            LoaderUtils.addExtensions(anims, LoaderUtils.defaultModelExtension)
+
+        muzzleModel = data.get("muzzleModel")
+        if anims is not None:
+            muzzleModel = LoaderUtils.addExtensionIfMissing(muzzleModel, LoaderUtils.defaultModelExtension)
+
+        return ToonHead(
+            model=LoaderUtils.addExtensionIfMissing(data["model"], LoaderUtils.defaultModelExtension),
+            parts=data["parts"],
+            muzzleModel=muzzleModel,
+            muzzles=muzzles,
+            anims=anims
+        )
+

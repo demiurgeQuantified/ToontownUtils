@@ -119,8 +119,7 @@ def loadBodies(bodies: dict[str, Any]) -> None:
         try:
             animations: dict = data.get("animations")
             if animations is not None:
-                for anim in animations:
-                    animations[anim] = LoaderUtils.addExtensionIfMissing(animations[anim], LoaderUtils.defaultModelExtension)
+                LoaderUtils.addExtensions(animations, LoaderUtils.defaultModelExtension)
             else:
                 print(f"WARN: Body {bodyType} has no animations.")
 

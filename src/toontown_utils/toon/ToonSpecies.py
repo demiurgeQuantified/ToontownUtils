@@ -1,7 +1,8 @@
 from typing import NamedTuple
 
+from toontown_utils.toon.ToonHead import ToonHead
+
 
 class ToonSpecies(NamedTuple):
-    heads: str
+    heads: dict[str, ToonHead]
     size: float = 1
-    headAnims: dict[str, str] = None
