@@ -21,6 +21,7 @@ class ToonActor(Actor):
         self.legsType = legs
 
         self.head: NodePath = None
+        self.muzzles: dict[str, NodePath] = {}
         self.torso: NodePath = None
         self.legs: NodePath = None
 
@@ -39,6 +40,7 @@ class ToonActor(Actor):
 
     def createModel(self, species: ToonSpecies, head: str, torso: ToonPart, legs: ToonPart) -> None:
         self.createHead(species.heads[head])
+        self.muzzles["neutral"].unstash()
         self.createTorso(torso)
         self.createLegs(legs)
         
@@ -85,6 +87,12 @@ class ToonActor(Actor):
             self.head.getChildren()[0].getChildren().stash()
             for part in head.parts:
                 self.head.find(f"**/{part};+s").unstash()
+
+        if head.muzzles is not None:
+            self.muzzles = {}
+            for muzzle, part in head.muzzles.items():
+                self.muzzles[muzzle] = self.head.find(f"**/{part};+s")
+
         if self.torso is not None:
             self.head.reparentTo(self.torso.find("**/def_head"))
 

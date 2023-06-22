@@ -71,7 +71,6 @@ def loadSpecies(species: dict[str, dict[str, Any]]):
                 except KeyError as e:
                     print(f"{speciesName} head {head} is missing required field {e.args[0]}.")
 
-
             Species[speciesName] = ToonSpecies(
                 heads=heads,
                 size=data.get("size", 1)
@@ -81,9 +80,6 @@ def loadSpecies(species: dict[str, dict[str, Any]]):
 
 
 def loadHead(data: dict[str, Any]) -> ToonHead:
-        muzzles = data["muzzles"]
-        LoaderUtils.addExtensions(muzzles, LoaderUtils.defaultModelExtension)
-
         anims = data.get("anims")
         if anims is not None:
             LoaderUtils.addExtensions(anims, LoaderUtils.defaultModelExtension)
@@ -96,7 +92,7 @@ def loadHead(data: dict[str, Any]) -> ToonHead:
             model=LoaderUtils.addExtensionIfMissing(data["model"], LoaderUtils.defaultModelExtension),
             parts=data["parts"],
             muzzleModel=muzzleModel,
-            muzzles=muzzles,
+            muzzles=data.get("muzzles"),
             anims=anims
         )
 
