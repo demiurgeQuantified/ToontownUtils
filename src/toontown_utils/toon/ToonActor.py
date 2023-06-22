@@ -43,7 +43,8 @@ class ToonActor(Actor):
         self.muzzles["neutral"].unstash()
         self.createTorso(torso)
         self.createLegs(legs)
-        
+        self.setScale(species.size)
+
         self.reapplyColors()
 
     def createLegs(self, legsPart: ToonPart) -> None:
