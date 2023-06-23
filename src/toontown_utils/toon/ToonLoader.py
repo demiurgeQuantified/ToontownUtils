@@ -90,7 +90,11 @@ def loadHead(data: dict[str, Any]) -> ToonHead:
 
         return ToonHead(
             model=LoaderUtils.addExtensionIfMissing(data["model"], LoaderUtils.defaultModelExtension),
-            parts=data["parts"],
+            colorParts=data["parts"]["color"],
+            leftPupil=data["parts"]["pupil_L"],
+            rightPupil=data["parts"]["pupil_R"],
+            keepParts=data["parts"].get("keep"),
+            keepAllParts=data.get("keepParts", False),
             muzzleModel=muzzleModel,
             muzzles=data.get("muzzles"),
             anims=anims

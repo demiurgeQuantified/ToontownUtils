@@ -22,6 +22,10 @@ class ToonActor(Actor):
 
         self.head: NodePath = None
         self.muzzles: dict[str, NodePath] = {}
+        self.headColorParts: list[NodePath] = []
+        self.leftPupil: NodePath = None
+        self.rightPupil: NodePath = None
+
         self.torso: NodePath = None
         self.legs: NodePath = None
 
@@ -84,10 +88,27 @@ class ToonActor(Actor):
             self.loadAnims(head.anims, "head")
         self.head: NodePath = self.getPart("head")
 
-        if head.parts is not None:
+        if not head.keepAllParts:
             self.head.getChildren()[0].getChildren().stash()
-            for part in head.parts:
-                self.head.find(f"**/{part};+s").unstash()
+
+        self.headColorParts = []
+        for part in head.colorParts:
+            partNode: NodePath = self.head.find(f"**/{part};+s")
+            if partNode.isEmpty():
+                continue
+            partNode.unstash()
+            self.headColorParts.append(partNode)
+
+        for part in head.keepParts:
+            partNode: NodePath = self.head.find(f"**/{part};+s")
+            if partNode.isEmpty():
+                continue
+            partNode.unstash()
+
+        self.leftPupil = self.head.find(f"**/{head.leftPupil};+s")
+        self.leftPupil.unstash()
+        self.rightPupil = self.head.find(f"**/{head.rightPupil};+s")
+        self.rightPupil.unstash()
 
         if head.muzzles is not None:
             self.muzzles = {}
@@ -167,7 +188,8 @@ class ToonActor(Actor):
         self._headColor = color
         if self.head is None:
             return
-        self.head.findAllMatches("**/head*").setColor(color)
+        for part in self.headColorParts:
+            part.setColor(color)
 
     @property
     def headType(self) -> str:
