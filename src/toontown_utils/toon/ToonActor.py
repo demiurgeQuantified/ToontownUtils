@@ -14,6 +14,7 @@ class ToonActor(Actor):
                  head: str | ToonHead = None, torso: str | ToonPart = None, legs: ToonPart | str = None,
                  clothingType: str = "skirt", eyelashes: bool = False) -> None:
         Actor.__init__(self)
+        # TODO: most of these properties are pointless
         self.species: ToonSpecies = species
         self.clothingType = clothingType
         self.headType = head
@@ -22,6 +23,7 @@ class ToonActor(Actor):
 
         self.head: NodePath = None
         self.muzzles: dict[str, NodePath] = {}
+        # TODO: it's probably unnecessary to keep the color parts as a property, maybe the muzzles too?
         self.headColorParts: list[NodePath] = []
         self.leftPupil: NodePath = None
         self.rightPupil: NodePath = None
@@ -34,16 +36,17 @@ class ToonActor(Actor):
         self._legsColor = Vec4(1, 0, 0, 1)
         self._glovesColor = Vec4(1, 1, 1, 1)
 
+        # TODO: these definitely don't need to be properties...
         self._topTexture: Texture = None
         self._sleeveTexture: Texture = None
         self._bottomTexture: Texture = None
         self._topColor = Vec4(1, 1, 1, 1)
         self._bottomColor = Vec4(1, 1, 1, 1)
 
-        self.createModel(self.species, self.headType, self.torsoType, self.legsType)
+        self.createModel(self.species, self.headType, self.torsoType, self.legsType, eyelashes)
 
-    def createModel(self, species: ToonSpecies, head: str, torso: ToonPart, legs: ToonPart) -> None:
-        self.createHead(species.heads[head])
+    def createModel(self, species: ToonSpecies, head: str, torso: ToonPart, legs: ToonPart, eyelashes: bool) -> None:
+        self.createHead(species.heads[head], eyelashes)
         self.muzzles["neutral"].unstash()
         self.createTorso(torso)
         self.createLegs(legs)
@@ -79,7 +82,8 @@ class ToonActor(Actor):
         if self.head is not None:
             self.head.reparentTo(self.torso.find("**/def_head"))
 
-    def createHead(self, head: ToonHead) -> None:
+    def createHead(self, head: ToonHead, eyelashes: bool = False) -> None:
+        # TODO: maybe remove nodes instead of stashing them
         if self.head is not None:
             self.head.removeNode()
 
@@ -114,6 +118,15 @@ class ToonActor(Actor):
             self.muzzles = {}
             for muzzle, part in head.muzzles.items():
                 self.muzzles[muzzle] = self.head.find(f"**/{part};+s")
+
+        if eyelashes:
+            if head.eyelashes.model:
+                eyelashes = loader.loadModel(head.eyelashes.model)
+                eyelashes.getChildren()[0].getChildren().stash()
+                eyelashes.find(f"**/{head.eyelashes.open};+s").unstash()
+                eyelashes.reparentTo(self.head)
+            else:
+                self.head.find(f"**/{head.eyelashes.closed};+s").stash()
 
         if self.torso is not None:
             self.head.reparentTo(self.torso.find("**/def_head"))

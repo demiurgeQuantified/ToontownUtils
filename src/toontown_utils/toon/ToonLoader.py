@@ -3,7 +3,7 @@ from typing import Any
 from toontown_utils import LoaderUtils
 from toontown_utils.toon.ToonPart import ToonPart
 from toontown_utils.toon.ToonSpecies import ToonSpecies
-from toontown_utils.toon.ToonHead import ToonHead
+from toontown_utils.toon.ToonHead import ToonHead, Eyelashes
 
 Species: dict[str, ToonSpecies] = {}
 Legs: dict[str, dict[str, ToonPart]] = {
@@ -76,7 +76,7 @@ def loadSpecies(species: dict[str, dict[str, Any]]):
                 size=data.get("size", 1)
             )
         except KeyError as e:
-            print(f"Species {species} is missing required field {e.args[0]}.")
+            print(f"Species {speciesName} is missing required field {e.args[0]}.")
 
 
 def loadHead(data: dict[str, Any]) -> ToonHead:
@@ -88,6 +88,15 @@ def loadHead(data: dict[str, Any]) -> ToonHead:
         if anims is not None:
             muzzleModel = LoaderUtils.addExtensionIfMissing(muzzleModel, LoaderUtils.defaultModelExtension)
 
+        eyelashModel = data["eyelashes"].get("model")
+        if eyelashModel is not None:
+            eyelashModel = LoaderUtils.addExtensionIfMissing(eyelashModel, LoaderUtils.defaultModelExtension)
+        eyelashes = Eyelashes(
+            model=eyelashModel,
+            open=data["eyelashes"]["open"],
+            closed=data["eyelashes"]["closed"]
+        )
+
         return ToonHead(
             model=LoaderUtils.addExtensionIfMissing(data["model"], LoaderUtils.defaultModelExtension),
             colorParts=data["parts"]["color"],
@@ -97,6 +106,7 @@ def loadHead(data: dict[str, Any]) -> ToonHead:
             keepAllParts=data.get("keepParts", False),
             muzzleModel=muzzleModel,
             muzzles=data.get("muzzles"),
+            eyelashes=eyelashes,
             anims=anims
         )
 
