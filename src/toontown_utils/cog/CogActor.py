@@ -23,6 +23,7 @@ class CogActor(Actor):
         :param lose: Should the lose model be used?
         """
         Actor.__init__(self)
+        # TODO: ToonActor cleaned up all these stupid properties, CogActor should be updated to match
         self._isLose = lose
         self._isSkelecog = skelecog
 
