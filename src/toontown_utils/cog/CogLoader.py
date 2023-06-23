@@ -54,11 +54,9 @@ def loadCogs(cogs: dict[str, Any]) -> None:
             continue
 
         try:
-            headColor: list | Vec4 = data.get("headColor")
-            if headColor is not None:
-                headColor = LoaderUtils.readColor(headColor)
+            headColor = LoaderUtils.readColor(data.get("headColor"))
 
-            gloveColor: list | Vec4 = data.get("gloveColor", dept.gloveColor or None)
+            gloveColor: list | Vec4 = data.get("gloveColor", dept.gloveColor)
             if gloveColor is None:
                 gloveColor = Vec4(0, 0, 0, 1)
                 print(
@@ -66,9 +64,7 @@ def loadCogs(cogs: dict[str, Any]) -> None:
             if isinstance(gloveColor, list):
                 gloveColor = LoaderUtils.readColor(gloveColor)
 
-            headTexture: str = data.get("headTexture")
-            if headTexture is not None:
-                headTexture = LoaderUtils.addExtensionIfMissing(headTexture, LoaderUtils.defaultTextureExtension)
+            headTexture = LoaderUtils.addExtensionIfMissing(data.get("headTexture"), LoaderUtils.defaultTextureExtension)
 
             Cogs[cog] = TemplateCog(
                 cog,
@@ -88,13 +84,8 @@ def loadCogs(cogs: dict[str, Any]) -> None:
 def loadDepartments(depts: dict[str, Any]) -> None:
     for dept, data in depts.items():
         try:
-            gloveColor: list | Vec4 = data.get("gloveColor")
-            if gloveColor is not None:
-                gloveColor = LoaderUtils.readColor(gloveColor)
-
-            medallionColor: list | Vec4 = data["medallion"].get("color")
-            if medallionColor is not None:
-                medallionColor = LoaderUtils.readColor(medallionColor)
+            gloveColor = LoaderUtils.readColor(data.get("gloveColor"))
+            medallionColor = LoaderUtils.readColor(data["medallion"].get("color"))
 
             medallion = Medallion(
                 model=LoaderUtils.addExtensionIfMissing(data["medallion"]["model"], LoaderUtils.defaultModelExtension),
@@ -123,17 +114,13 @@ def loadBodies(bodies: dict[str, Any]) -> None:
             else:
                 print(f"WARN: Body {bodyType} has no animations.")
 
-            loseModel: str = data.get("loseModel")
-            if loseModel is not None:
-                loseModel = LoaderUtils.addExtensionIfMissing(loseModel, LoaderUtils.defaultModelExtension)
+            loseModel = LoaderUtils.addExtensionIfMissing(data.get("loseModel"), LoaderUtils.defaultModelExtension)
 
             skelecog: Skelecog = None
             skelecogData = data.get("skelecog")
             if skelecogData is not None:
                 try:
-                    skeleLoseModel = skelecogData.get("loseModel")
-                    if skeleLoseModel is not None:
-                        skeleLoseModel = LoaderUtils.addExtensionIfMissing(skeleLoseModel, LoaderUtils.defaultModelExtension)
+                    skeleLoseModel = LoaderUtils.addExtensionIfMissing(skelecogData.get("loseModel"), LoaderUtils.defaultModelExtension)
                     skelecog = Skelecog(
                         LoaderUtils.addExtensionIfMissing(skelecogData["model"], LoaderUtils.defaultModelExtension),
                         skeleLoseModel

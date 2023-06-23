@@ -6,11 +6,15 @@ defaultTextureExtension = "jpg"
 defaultModelExtension = "bam"
 
 
-def readColor(col: list) -> Vec4:
+def readColor(col: list | None) -> Vec4 | None:
+    if col is None:
+        return None
     return Vec4(col[0], col[1], col[2], 1)
 
 
-def addExtensionIfMissing(tex: str, ext: str) -> str:
+def addExtensionIfMissing(tex: str | None, ext: str) -> None | str:
+    if tex is None:
+        return None
     if "." not in tex.split("/")[-1]:
         tex = tex + "." + ext
     return tex

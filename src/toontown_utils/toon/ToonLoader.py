@@ -84,13 +84,10 @@ def loadHead(data: dict[str, Any]) -> ToonHead:
         if anims is not None:
             LoaderUtils.addExtensions(anims, LoaderUtils.defaultModelExtension)
 
-        muzzleModel = data.get("muzzleModel")
-        if anims is not None:
-            muzzleModel = LoaderUtils.addExtensionIfMissing(muzzleModel, LoaderUtils.defaultModelExtension)
+        muzzleModel = LoaderUtils.addExtensionIfMissing(data.get("muzzleModel"), LoaderUtils.defaultModelExtension)
 
-        eyelashModel = data["eyelashes"].get("model")
-        if eyelashModel is not None:
-            eyelashModel = LoaderUtils.addExtensionIfMissing(eyelashModel, LoaderUtils.defaultModelExtension)
+        eyelashModel = LoaderUtils.addExtensionIfMissing(data["eyelashes"].get("model"), LoaderUtils.defaultModelExtension)
+
         eyelashes = Eyelashes(
             model=eyelashModel,
             open=data["eyelashes"]["open"],
