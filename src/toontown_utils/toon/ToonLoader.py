@@ -80,35 +80,35 @@ def loadSpecies(species: dict[str, dict[str, Any]]):
 
 
 def loadHead(data: dict[str, Any]) -> ToonHead:
-        anims = data.get("anims")
-        if anims is not None:
-            LoaderUtils.addExtensions(anims, LoaderUtils.defaultModelExtension)
+    anims = data.get("anims")
+    if anims is not None:
+        LoaderUtils.addExtensions(anims, LoaderUtils.defaultModelExtension)
 
-        extraMuzzles = {}
-        extraMuzzlesRaw = data.get("extraMuzzles")
-        if extraMuzzlesRaw is not None:
-            for modelName, parts in extraMuzzlesRaw.items():
-                modelName = LoaderUtils.addExtensionIfMissing(modelName, LoaderUtils.defaultModelExtension)
-                extraMuzzles[modelName] = parts
+    extraMuzzles = {}
+    extraMuzzlesRaw = data.get("extraMuzzles")
+    if extraMuzzlesRaw is not None:
+        for modelName, parts in extraMuzzlesRaw.items():
+            modelName = LoaderUtils.addExtensionIfMissing(modelName, LoaderUtils.defaultModelExtension)
+            extraMuzzles[modelName] = parts
 
-        eyelashModel = LoaderUtils.addExtensionIfMissing(data["eyelashes"].get("model"), LoaderUtils.defaultModelExtension)
+    eyelashModel = LoaderUtils.addExtensionIfMissing(data["eyelashes"].get("model"), LoaderUtils.defaultModelExtension)
 
-        eyelashes = Eyelashes(
-            model=eyelashModel,
-            open=data["eyelashes"]["open"],
-            closed=data["eyelashes"]["closed"]
-        )
+    eyelashes = Eyelashes(
+        model=eyelashModel,
+        open=data["eyelashes"]["open"],
+        closed=data["eyelashes"]["closed"]
+    )
 
-        return ToonHead(
-            model=LoaderUtils.addExtensionIfMissing(data["model"], LoaderUtils.defaultModelExtension),
-            colorParts=data["parts"]["color"],
-            leftPupil=data["parts"]["pupil_L"],
-            rightPupil=data["parts"]["pupil_R"],
-            keepParts=data["parts"].get("keep"),
-            keepAllParts=data.get("keepAllParts", False),
-            extraMuzzles=extraMuzzles,
-            muzzles=data.get("muzzles"),
-            eyelashes=eyelashes,
-            anims=anims
-        )
+    return ToonHead(
+        model=LoaderUtils.addExtensionIfMissing(data["model"], LoaderUtils.defaultModelExtension),
+        colorParts=data["parts"]["color"],
+        leftPupil=data["parts"]["pupil_L"],
+        rightPupil=data["parts"]["pupil_R"],
+        keepParts=data["parts"].get("keep"),
+        keepAllParts=data.get("keepAllParts", False),
+        extraMuzzles=extraMuzzles,
+        muzzles=data.get("muzzles"),
+        eyelashes=eyelashes,
+        anims=anims
+    )
 

@@ -1,4 +1,4 @@
-from panda3d.core import NodePath, Vec4, Texture
+from panda3d.core import NodePath, NodePathCollection, Vec4, Texture
 
 from direct.actor.Actor import Actor
 
@@ -44,7 +44,6 @@ class ToonActor(Actor):
 
     def createModel(self, species: ToonSpecies, head: ToonHead, torso: ToonPart, legs: ToonPart, eyelashes: bool) -> None:
         self.createHead(head, eyelashes)
-        self.muzzles["surprise"].unstash()
         self.createTorso(torso)
         self.createLegs(legs)
         self.setScale(species.size)
@@ -129,6 +128,16 @@ class ToonActor(Actor):
                 node.reparentTo(self.head)
                 for muzzle, part in muzzles.items():
                     self.muzzles[muzzle] = node.find(f"**/{part};+s")
+
+        self.muzzles["neutral"].unstash()
+
+    def showMuzzle(self, muzzle: str) -> None:
+        for node in self.muzzles.values():
+            node.stash()
+        self.muzzles[muzzle].unstash()
+
+    def setEyesTexture(self, tex: Texture) -> None:
+        self.head.find("**/eyes").setTexture(tex, 1)
 
     def setLegsColor(self, color: Vec4) -> None:
         for pieceName in ("legs", "feet"):
