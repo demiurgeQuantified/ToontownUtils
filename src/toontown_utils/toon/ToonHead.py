@@ -16,5 +16,5 @@ class ToonHead(NamedTuple):
     eyelashes: Eyelashes
     keepParts: list[str] = None
     keepAllParts: bool = False
-    muzzleModel: str = None
+    extraMuzzles: dict[str, dict[str, str]] = None
     anims: dict[str, str] = None

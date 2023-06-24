@@ -44,7 +44,7 @@ class ToonActor(Actor):
 
     def createModel(self, species: ToonSpecies, head: ToonHead, torso: ToonPart, legs: ToonPart, eyelashes: bool) -> None:
         self.createHead(head, eyelashes)
-        self.muzzles["neutral"].unstash()
+        self.muzzles["surprise"].unstash()
         self.createTorso(torso)
         self.createLegs(legs)
         self.setScale(species.size)
@@ -80,14 +80,13 @@ class ToonActor(Actor):
 
         if not head.keepAllParts:
             self.head.getChildren()[0].getChildren().stash()
+            for part in head.keepParts:
+                partNode: NodePath = self.head.find(f"**/{part};+s")
+                if partNode.isEmpty():
+                    continue
+                partNode.unstash()
 
         for part in head.colorParts:
-            partNode: NodePath = self.head.find(f"**/{part};+s")
-            if partNode.isEmpty():
-                continue
-            partNode.unstash()
-
-        for part in head.keepParts:
             partNode: NodePath = self.head.find(f"**/{part};+s")
             if partNode.isEmpty():
                 continue
@@ -98,10 +97,7 @@ class ToonActor(Actor):
         self.rightPupil = self.head.find(f"**/{head.rightPupil};+s")
         self.rightPupil.unstash()
 
-        if head.muzzles is not None:
-            self.muzzles = {}
-            for muzzle, part in head.muzzles.items():
-                self.muzzles[muzzle] = self.head.find(f"**/{part};+s")
+        self.createMuzzles(head)
 
         if eyelashes:
             self.createEyelashes(head.eyelashes)
@@ -117,6 +113,22 @@ class ToonActor(Actor):
             eyelashes.reparentTo(self.head)
         else:
             self.head.find(f"**/{lashes.closed};+s").stash()
+
+    def createMuzzles(self, head: ToonHead) -> None:
+        self.muzzles = {}
+        if head.muzzles is not None:
+            for muzzle, part in head.muzzles.items():
+                muzzleNode: NodePath = self.head.find(f"**/{part};+s")
+                self.muzzles[muzzle] = muzzleNode
+                muzzleNode.stash()
+
+        if head.extraMuzzles is not None:
+            for model, muzzles in head.extraMuzzles.items():
+                node: NodePath = loader.loadModel(model)
+                node.getChildren()[0].getChildren().stash()
+                node.reparentTo(self.head)
+                for muzzle, part in muzzles.items():
+                    self.muzzles[muzzle] = node.find(f"**/{part};+s")
 
     def setLegsColor(self, color: Vec4) -> None:
         for pieceName in ("legs", "feet"):
@@ -158,4 +170,3 @@ class ToonActor(Actor):
         if not isinstance(tex, Texture):
             tex = loader.loadTexture(tex)
         self.torso.find("**/sleeves").setTexture(tex, 1)
-
