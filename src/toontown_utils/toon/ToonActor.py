@@ -156,6 +156,10 @@ class ToonActor(Actor):
                 continue
             part.setColor(color)
 
+    def setGlovesColor(self, color: Vec4) -> None:
+        gloves = self.torso.find("**/hands")
+        gloves.setColor(color)
+
     def setTopColor(self, color: Vec4) -> None:
         for pieceName in ("torso-top", "sleeves"):
             piece = self.legs.find(f"**/{pieceName}")
