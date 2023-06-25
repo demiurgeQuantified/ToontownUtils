@@ -79,11 +79,12 @@ class ToonActor(Actor):
 
         if not head.keepAllParts:
             self.head.getChildren()[0].getChildren().stash()
-            for part in head.keepParts:
-                partNode: NodePath = self.head.find(f"**/{part};+s")
-                if partNode.isEmpty():
-                    continue
-                partNode.unstash()
+            if head.keepParts is not None:
+                for part in head.keepParts:
+                    partNode: NodePath = self.head.find(f"**/{part};+s")
+                    if partNode.isEmpty():
+                        continue
+                    partNode.unstash()
 
         for part in head.colorParts:
             partNode: NodePath = self.head.find(f"**/{part};+s")
@@ -95,6 +96,7 @@ class ToonActor(Actor):
         self.leftPupil.unstash()
         self.rightPupil = self.head.find(f"**/{head.rightPupil};+s")
         self.rightPupil.unstash()
+        self.head.find(f"**/{head.eyes};+s").unstash()
 
         self.createMuzzles(head)
 
@@ -137,7 +139,7 @@ class ToonActor(Actor):
         self.muzzles[muzzle].unstash()
 
     def setEyesTexture(self, tex: Texture) -> None:
-        self.head.find("**/eyes").setTexture(tex, 1)
+        self.head.find(f"**/{self.headType.eyes}").setTexture(tex, 1)
 
     def setLegsColor(self, color: Vec4) -> None:
         for pieceName in ("legs", "feet"):

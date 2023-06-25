@@ -13,6 +13,7 @@ class ToonHead(NamedTuple):
     colorParts: list[str]
     leftPupil: str
     rightPupil: str
+    eyes: str
     eyelashes: Eyelashes
     keepParts: list[str] = None
     keepAllParts: bool = False

@@ -99,12 +99,15 @@ def loadHead(data: dict[str, Any]) -> ToonHead:
         closed=data["eyelashes"]["closed"]
     )
 
+    partData = data["parts"]
+
     return ToonHead(
         model=LoaderUtils.addExtensionIfMissing(data["model"], LoaderUtils.defaultModelExtension),
-        colorParts=data["parts"]["color"],
-        leftPupil=data["parts"]["pupil_L"],
-        rightPupil=data["parts"]["pupil_R"],
-        keepParts=data["parts"].get("keep"),
+        colorParts=partData["color"],
+        leftPupil=partData["pupil_L"],
+        rightPupil=partData["pupil_R"],
+        eyes=partData["eyes"],
+        keepParts=partData.get("keep"),
         keepAllParts=data.get("keepAllParts", False),
         extraMuzzles=extraMuzzles,
         muzzles=data.get("muzzles"),
