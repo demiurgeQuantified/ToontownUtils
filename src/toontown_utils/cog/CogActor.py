@@ -7,6 +7,8 @@ from toontown_utils.TemplateManager import Cogs
 
 
 class CogActor(Actor):
+    # TODO: a lot of the isLose/isSkelecog checks should be moved from inside the functions to the function calls
+    # they could also be made redundant in future by loading attachments + texture areas from body script
     def __init__(self, cogType: TemplateCog | str = None,
                  bodyType: CogBody = None, dept: Department = None, head: str = None,
                  skelecog=False, waiter=False, lose=False) -> None:
@@ -23,13 +25,11 @@ class CogActor(Actor):
         :param lose: Should the lose model be used?
         """
         Actor.__init__(self)
-        # TODO: ToonActor cleaned up all these stupid properties, CogActor should be updated to match
         self._isLose = lose
         self._isSkelecog = skelecog
 
-        self._template: TemplateCog = cogType
         self._bodyType: CogBody = bodyType
-        self.department: Department = dept
+        self._medallionDept: Department = dept
 
         self.head: NodePath = None
         self.medallion: NodePath = None
@@ -42,15 +42,15 @@ class CogActor(Actor):
         self._sleeveTexture = None
         self._tieTexture = None
         self._headTexture = None
-        self._gloveColor = Vec4(1, 1, 1, 1)
-        self._headColor = Vec4(1, 1, 1, 1)
+        self._gloveColor = None
+        self._headColor = None
 
         if cogType is not None:
             self.loadTemplate(cogType)
             if waiter:
                 self.makeWaiter()
         elif bodyType is not None:
-            self.createModel(bodyType, skelecog, lose)
+            self.createModel(bodyType, department=dept, skelecog=skelecog, lose=lose)
             if dept is not None:
                 self.setDepartmentTextures(dept)
             if head is not None:
@@ -72,27 +72,20 @@ class CogActor(Actor):
             except KeyError:
                 print(f"CogActor: No such cog template {template}")
                 return
-        self._template = template
-        self.department = template.department
 
-        self.createModel(template.body, skelecog=self._isSkelecog, lose=self._isLose)
+        self.createModel(template.body, department=template.department, skelecog=self._isSkelecog, lose=self._isLose)
         self.setScale(template.size / template.body.sizeFactor)
 
         self.setDepartmentTextures(template.department)
-
-        self.gloveColor = template.gloveColor
-
-        if template.headColor is not None:
-            self.headColor = template.headColor
-        else:
-            self.headColor = Vec4(1, 1, 1, 1)
+        self.setGloveColor(template.gloveColor)
+        self.setHeadColor(template.headColor)
 
         self.showHeadModel(template.head)
 
         if template.head2 is not None:
             self.showHeadModel(template.head2, False)
 
-        self.headTexture = template.headTexture
+        self.setHeadTexture(template.headTexture)
 
     def createHead(self, bodyType: CogBody):
         """
@@ -105,10 +98,11 @@ class CogActor(Actor):
         self.head = loader.loadModel(bodyType.headsModel).getChild(0)
         self.head.reparentTo(self.find("**/joint_head"))
 
-    def createModel(self, bodyType: CogBody, skelecog=False, lose=False) -> None:
+    def createModel(self, bodyType: CogBody, department: Department = None, skelecog=False, lose=False) -> None:
         """
         Creates the appropriate model and all subparts for the given Body. Also cleans up the previous model if necessary.
-        :param bodyType: The Body that stores the wanted models
+        :param bodyType: The CogBody that stores the wanted models
+        :param department: The department to generate a medallion for
         :param skelecog: Should the skelecog model be used?
         :param lose: Should the lose model be used? (respects skelecog)
         :return:
@@ -130,8 +124,8 @@ class CogActor(Actor):
                 self.loadModel(bodyType.skelecog.model)
 
             self.createHealthMeter()
-            if self.department is not None:
-                self.createMedallion(self.department)
+            if department is not None:
+                self.createMedallion(department)
 
             if bodyType.animations is not None:
                 self.loadAnims(bodyType.animations)
@@ -153,6 +147,7 @@ class CogActor(Actor):
         :param dept:
         :return:
         """
+        self._medallionDept = dept
         if self._isLose:
             return
         if self.medallion is not None:
@@ -211,7 +206,7 @@ class CogActor(Actor):
         self.healthMeter = None
         self.healthMeterGlow = None
 
-        self.createModel(self._bodyType, self._isSkelecog, True)
+        self.createModel(self._bodyType, department=self._medallionDept, skelecog=self._isSkelecog, lose=True)
         self.reapplyTextures()
         self.reapplyShowingHeads()
 
@@ -225,12 +220,10 @@ class CogActor(Actor):
             return
         self._isLose = False
 
-        self.createModel(self._bodyType, self._isSkelecog, False)
+        self.createModel(self._bodyType, department=self._medallionDept, skelecog=self._isSkelecog, lose=False)
         self.reapplyTextures()
         self.reapplyShowingHeads()
 
-        if self.department is not None:
-            self.createMedallion(self.department)
         self.createHealthMeter()
 
     def setSkelecog(self, skelecog: bool) -> None:
@@ -243,7 +236,7 @@ class CogActor(Actor):
             return
         self._isSkelecog = skelecog
 
-        self.createModel(self._bodyType, skelecog, self._isLose)
+        self.createModel(self._bodyType, department=self._medallionDept, skelecog=skelecog, lose=self._isLose)
         self.reapplyTextures()
         if not skelecog:
             self.reapplyShowingHeads()
@@ -273,15 +266,14 @@ class CogActor(Actor):
         :return:
         """
         if not self._isSkelecog:
-            self.find("**/legs").setTexture(self.legTexture, 1)
-            self.find("**/torso").setTexture(self.blazerTexture, 1)
-            self.find("**/arms").setTexture(self.sleeveTexture, 1)
-            if self.headTexture is not None:
-                self.head.setTexture(self.headTexture, 1)
-            self.find("**/hands").setColor(self.gloveColor)
-            self.head.setColor(self.headColor)
+            self.setLegTexture(self._legTexture)
+            self.setBlazerTexture(self._blazerTexture)
+            self.setSleeveTexture(self._sleeveTexture)
+            self.setHeadTexture(self._headTexture)
+            self.setGloveColor(self._gloveColor)
+            self.setHeadColor(self._headColor)
         else:
-            self.find("**/tie").setTexture(self.tieTexture, 1)
+            self.setTieTexture(self._tieTexture)
 
     def reapplyShowingHeads(self) -> None:
         """
@@ -331,11 +323,11 @@ class CogActor(Actor):
         :param tieTex:
         :return:
         """
-        self.legTexture = legTex
-        self.blazerTexture = blazerTex
-        self.sleeveTexture = sleeveTex
+        self.setLegTexture(legTex)
+        self.setBlazerTexture(blazerTex)
+        self.setSleeveTexture(sleeveTex)
         if tieTex is not None:
-            self.tieTexture = tieTex
+            self.setTieTexture(tieTex)
 
     def setDepartmentTextures(self, dept: Department) -> None:
         """
@@ -352,87 +344,57 @@ class CogActor(Actor):
         """
         self.setBodyTextures(CogGlobals.waiterLeg, CogGlobals.waiterBlazer, CogGlobals.waiterSleeve)
 
-    @property
-    def legTexture(self) -> Texture:
-        return self._legTexture
-
-    @legTexture.setter
-    def legTexture(self, tex: str | Texture) -> None:
+    def setLegTexture(self, tex: str | Texture) -> None:
         if not isinstance(tex, Texture):
             tex = loader.loadTexture(tex)
         self._legTexture = tex
         if not self._isSkelecog:
             self.find("**/legs").setTexture(tex, 1)
 
-    @property
-    def blazerTexture(self) -> Texture:
-        return self._blazerTexture
-
-    @blazerTexture.setter
-    def blazerTexture(self, tex: str | Texture) -> None:
+    def setBlazerTexture(self, tex: str | Texture) -> None:
         if not isinstance(tex, Texture):
             tex = loader.loadTexture(tex)
         self._blazerTexture = tex
         if not self._isSkelecog:
             self.find("**/torso").setTexture(tex, 1)
 
-    @property
-    def sleeveTexture(self) -> Texture:
-        return self._sleeveTexture
-
-    @sleeveTexture.setter
-    def sleeveTexture(self, tex: str | Texture) -> None:
+    def setSleeveTexture(self, tex: str | Texture) -> None:
         if not isinstance(tex, Texture):
             tex = loader.loadTexture(tex)
         self._sleeveTexture = tex
         if not self._isSkelecog:
             self.find("**/arms").setTexture(tex, 1)
 
-    @property
-    def tieTexture(self) -> Texture:
-        return self._tieTexture
-
-    @tieTexture.setter
-    def tieTexture(self, tex: str | Texture) -> None:
+    def setTieTexture(self, tex: str | Texture) -> None:
         if not isinstance(tex, Texture):
             tex = loader.loadTexture(tex)
         self._tieTexture = tex
         if self._isSkelecog:
             self.find("**/tie").setTexture(tex, 1)
 
-    @property
-    def headTexture(self) -> Texture | None:
-        return self._headTexture
-
-    @headTexture.setter
-    def headTexture(self, tex: str | Texture | None) -> None:
-        if tex is None:
-            self._headTexture = None
-            if not self._isSkelecog:
-                self.head.clearTexture()
-            return
-        if not isinstance(tex, Texture):
+    def setHeadTexture(self, tex: str | Texture | None) -> None:
+        if isinstance(tex, str):
             tex = loader.loadTexture(tex)
         self._headTexture = tex
         if not self._isSkelecog:
-            self.head.setTexture(tex, 1)
+            if tex is None:
+                self.head.clearTexture()
+            else:
+                self.head.setTexture(tex, 1)
 
-    @property
-    def gloveColor(self) -> Vec4:
-        return self._gloveColor
-
-    @gloveColor.setter
-    def gloveColor(self, color: Vec4) -> None:
+    def setGloveColor(self, color: Vec4 | None) -> None:
         self._gloveColor = color
         if not self._isSkelecog:
-            self.find("**/hands").setColor(color)
+            hands = self.find("**/hands")
+            if color is None:
+                hands.clearColor()
+            else:
+                hands.setColor(color)
 
-    @property
-    def headColor(self) -> Vec4:
-        return self._headColor
-
-    @headColor.setter
-    def headColor(self, color: Vec4) -> None:
+    def setHeadColor(self, color: Vec4 | None) -> None:
         self._headColor = color
         if self.head is not None:
-            self.head.setColor(color)
+            if color is None:
+                self.head.clearColor()
+            else:
+                self.head.setColor(color)
