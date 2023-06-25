@@ -48,7 +48,7 @@ def loadFile(path: str, schema: str = None) -> bool:
     file.close()
 
     if schema is None:
-        schema = contents.get("schema")
+        schema = contents.get("$schema")
         if schema == "toonschema.json":
             schema = "toon"
         elif schema == "cogschema.json":
