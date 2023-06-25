@@ -6,11 +6,11 @@ from toontown_utils import LoaderUtils
 
 from toontown_utils.cog.TemplateCog import TemplateCog
 from toontown_utils.cog.Department import Department, Medallion
-from toontown_utils.cog.Body import Body, Skelecog
+from toontown_utils.cog.CogBody import CogBody, Skelecog
 
 Cogs: dict[str, TemplateCog] = {}
 Departments: dict[str, Department] = {}
-Bodies: dict[str, Body] = {}
+Bodies: dict[str, CogBody] = {}
 
 
 def readFile(contents: dict[str, dict]) -> None:
@@ -48,7 +48,7 @@ def loadCogs(cogs: dict[str, Any]) -> None:
             continue
 
         try:
-            bodyType: Body = Bodies[body]
+            bodyType: CogBody = Bodies[body]
         except KeyError:
             print(f"Cog {cog} has unknown body {body}")
             continue
@@ -67,12 +67,12 @@ def loadCogs(cogs: dict[str, Any]) -> None:
             headTexture = LoaderUtils.addExtensionIfMissing(data.get("headTexture"), LoaderUtils.defaultTextureExtension)
 
             Cogs[cog] = TemplateCog(
-                cog,
-                dept,
-                bodyType,
-                data["size"],
-                gloveColor,
-                data["head"],
+                name=cog,
+                department=dept,
+                body=bodyType,
+                size=data["size"],
+                gloveColor=gloveColor,
+                head=data["head"],
                 head2=data.get("head2"),
                 headTexture=headTexture,
                 headColor=headColor
@@ -128,7 +128,7 @@ def loadBodies(bodies: dict[str, Any]) -> None:
                 except KeyError as e:
                     print(f"Body {bodyType} skelecog is missing required field {e.args[0]}, skipping.")
 
-            Bodies[bodyType] = Body(
+            Bodies[bodyType] = CogBody(
                 LoaderUtils.addExtensionIfMissing(data["model"], LoaderUtils.defaultModelExtension),
                 LoaderUtils.addExtensionIfMissing(data["headsModel"], LoaderUtils.defaultModelExtension),
                 animations=animations,

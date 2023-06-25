@@ -8,7 +8,7 @@ from toontown_utils.TemplateManager import Cogs
 
 class CogActor(Actor):
     def __init__(self, cogType: TemplateCog | str = None,
-                 bodyType: Body = None, dept: Department = None, head: str = None,
+                 bodyType: CogBody = None, dept: Department = None, head: str = None,
                  skelecog=False, waiter=False, lose=False) -> None:
         """
         CogActor constructor.
@@ -28,7 +28,7 @@ class CogActor(Actor):
         self._isSkelecog = skelecog
 
         self._template: TemplateCog = cogType
-        self._bodyType: Body = bodyType
+        self._bodyType: CogBody = bodyType
         self.department: Department = dept
 
         self.head: NodePath = None
@@ -94,7 +94,7 @@ class CogActor(Actor):
 
         self.headTexture = template.headTexture
 
-    def createHead(self, bodyType: Body):
+    def createHead(self, bodyType: CogBody):
         """
         Creates the head model for the bodyType and attaches it. Cleans up an existing head if necessary.
         :param bodyType:
@@ -105,7 +105,7 @@ class CogActor(Actor):
         self.head = loader.loadModel(bodyType.headsModel).getChild(0)
         self.head.reparentTo(self.find("**/joint_head"))
 
-    def createModel(self, bodyType: Body, skelecog=False, lose=False) -> None:
+    def createModel(self, bodyType: CogBody, skelecog=False, lose=False) -> None:
         """
         Creates the appropriate model and all subparts for the given Body. Also cleans up the previous model if necessary.
         :param bodyType: The Body that stores the wanted models

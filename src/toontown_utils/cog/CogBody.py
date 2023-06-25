@@ -6,7 +6,7 @@ class Skelecog(NamedTuple):
     loseModel: str = None
 
 
-class Body(NamedTuple):
+class CogBody(NamedTuple):
     model: str
     headsModel: str
     animations: dict[str, str] = None

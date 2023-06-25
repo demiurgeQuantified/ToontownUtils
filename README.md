@@ -8,9 +8,9 @@ and the matching heads model.
 
 ```python
 from toontown_utils.cog.CogActor import CogActor
-from toontown_utils.cog.Body import Body
+from toontown_utils.cog.CogBody import CogBody
 
-bodyA = Body(model="phase_3.5/models/char/suitA-mod.bam", headsModel="phase_4/models/char/suitA-heads.bam")
+bodyA = CogBody(model="phase_3.5/models/char/suitA-mod.bam", headsModel="phase_4/models/char/suitA-heads.bam")
 
 cog = CogActor(bodyType=bodyA, head="bigcheese")
 ```
