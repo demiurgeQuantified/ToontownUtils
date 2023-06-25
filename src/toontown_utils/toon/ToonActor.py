@@ -17,16 +17,10 @@ class ToonActor(Actor):
             species = TemplateManager.Species[species]
 
         if isinstance(torso, str):
-            try:
-                torso = TemplateManager.Torsos[clothingType][torso]
-            except KeyError:
-                torso = TemplateManager.Torsos["all"][torso]
+            torso = TemplateManager.getTorso(torso, clothingType)
 
         if isinstance(legs, str):
-            try:
-                legs = TemplateManager.Legs[clothingType][legs]
-            except KeyError:
-                legs = TemplateManager.Legs["all"][legs]
+            legs = TemplateManager.getLegs(legs, clothingType)
 
         self.headType = species.heads[head]
         self.torsoType = torso

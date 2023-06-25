@@ -1,8 +1,12 @@
+from __future__ import annotations
+from typing import TYPE_CHECKING
 import json
 
 from toontown_utils.cog import CogLoader
 
 from toontown_utils.toon import ToonLoader
+if TYPE_CHECKING:
+    from toontown_utils.toon.ToonPart import ToonPart
 
 Cogs = CogLoader.Cogs
 Departments = CogLoader.Departments
@@ -11,6 +15,20 @@ Bodies = CogLoader.Bodies
 Legs = ToonLoader.Legs
 Torsos = ToonLoader.Torsos
 Species = ToonLoader.Species
+
+
+def getLegs(type: str, clothingType: str) -> ToonPart:
+    try:
+        return Legs[clothingType][type]
+    except KeyError:
+        return Legs["all"][type]
+
+
+def getTorso(type: str, clothingType: str) -> ToonPart:
+    try:
+        return Torsos[clothingType][type]
+    except KeyError:
+        return Torsos["all"][type]
 
 
 def loadFile(path: str, schema: str = None) -> bool:
