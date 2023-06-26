@@ -1,4 +1,4 @@
-from panda3d.core import NodePath, NodePathCollection, Vec4, Texture
+from panda3d.core import NodePath, Vec4, Texture
 
 from direct.actor.Actor import Actor
 

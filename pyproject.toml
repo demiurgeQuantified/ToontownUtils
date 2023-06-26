@@ -1,25 +1,18 @@
-[build-system]
-requires = ["hatchling"]
-build-backend = "hatchling.build"
-
-[project]
-name = "ToontownUtils"
-version = "1.0.0"
-authors = [
-  { name="albion", email="demiurgequantified@gmail.com" },
-]
+[tool.poetry]
+name = "toontown-utils"
+version = "2.0.0"
 description = "Toontown-specific utilities for Panda3D"
+authors = ["albion <8355611+demiurgeQuantified@users.noreply.github.com>"]
+license = "MIT"
 readme = "README.md"
-requires-python = ">=3.10"
-dependencies = [
-    "panda3d"
-]
-classifiers = [
-    "Programming Language :: Python :: 3",
-    "License :: OSI Approved :: MIT License",
-    "Operating System :: OS Independent",
-]
+packages = [{include = "toontown_utils"}]
+repository = "https://github.com/demiurgeQuantified/ToontownUtils"
 
-[project.urls]
-"Homepage" = "https://github.com/demiurgeQuantified/ToontownUtils"
-"Bug Tracker" = "https://github.com/demiurgeQuantified/ToontownUtils/issues"
+[tool.poetry.dependencies]
+python = "^3.11"
+Panda3D = "^1.10.13.post1"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
