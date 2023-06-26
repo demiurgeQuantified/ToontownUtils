@@ -1,49 +1,33 @@
 # Toontown Utils
-A package for Panda3D that aims to streamline the usage of Toontown Online's assets, so that fan projects
-(games, videos, etc) can focus on implementing functionality and not putting models together correctly.
-## CogActors
-CogActors are a layer placed on top of regular Panda3D Actors to make creating and modifying Cog models simple calls.
-To create a CogActor from scratch, a Body tuple must first be created that, at minimum, points to the model of the body
-and the matching heads model.
+A package for Panda3D that streamlines the usage of Toontown Online assets, so that fan projects (games, videos, etc)
+can easily use them.
+## Features
+### ToonActors and CogActors
+ToonActors and CogActors give a simple syntax to creating and modifying Toontown's character models. Creating characters
+now only takes a few lines of code, and manipulating them can be done with simple API calls.
 
-```python
-from toontown_utils.cog.CogActor import CogActor
-from toontown_utils.cog.CogBody import CogBody
-
-bodyA = CogBody(model="phase_3.5/models/char/suitA-mod.bam", headsModel="phase_4/models/char/suitA-heads.bam")
-
-cog = CogActor(bodyType=bodyA, head="bigcheese")
-```
-Animations need to be loaded as usual.
-```python
-cog.loadAnims({"neutral": "phase_4/models/char/suitA-neutral.bam"})
-cog.reparentTo(render)
-cog.loop("neutral")
-```
-In most cases, manipulating aspects of the cog is as simple as setting attributes:
-```python
-cog.gloveColor = Vec4(1, 0, 0, 1)  # make sure to import Vec4 first!
-cog.sleeveTexture = "phase_3.5/maps/l_sleeve.jpg"
-```
-Defining bodies, loading animations, setting textures etc is still very tedious, which is why loading from JSON is the
-primary method of setting up cogs:
-### CogJSON
-Better syntax for manipulating cog models is one thing, but in most cases we only want preset cog designs. Additionally,
-things like animations are rarely project specific.
-[CogJSON](https://github.com/demiurgeQuantified/CogJSON) is a schema that allows easy configuration of cog templates.
-It provides a dataset based on the original cogs as these are most often all that is needed.
-
-Using CogJSON in your project is much simpler, as every detail of the cog is already defined for you.
-
+---
+## ToontownJSON
+Though optional, Toontown Utils is primarily intended for use with
+[ToontownJSON](https://github.com/demiurgeQuantified/ToontownJSON). ToontownJSON provides data on the vanilla cogs and
+toon parts. Its schema can also be used to add custom cogs, species and body parts.
 ```python
 from toontown_utils import TemplateManager
 from toontown_utils.cog.CogActor import CogActor
+from toontown_utils.toon.ToonActor import ToonActor
 
-TemplateManager.loadFile("path/to/my.json")
+TemplateManager.loadFile("cog.json")
 
 cog = CogActor(cogType="ColdCaller")
 cog.reparentTo(render)
 cog.loop("neutral")
+
+TemplateManager.loadFile("toon.json")
+
+toon = ToonActor(species="cat", head="ls", torso="m", legs="s", clothingType="skirt", eyelashes=True)
+toon.reparentTo(render)
+toon.setX(5)
+toon.loop("neutral")
 ```
-## ToonActors
-ToonActors are not implemented yet :(
+Without ToontownJSON, the syntax is much uglier, as models, animations, etc must all be defined in code before they are
+used.
