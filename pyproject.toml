@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "toontown-utils"
-version = "2.0.0"
+version = "2.0.1"
 description = "Toontown-specific utilities for Panda3D"
 authors = ["albion <8355611+demiurgeQuantified@users.noreply.github.com>"]
 license = "MIT"
