@@ -72,7 +72,11 @@ class ToonActor(Actor):
         self.head: NodePath = self.getPart("head")
 
         if not head.keepAllParts:
-            self.head.getChildren()[0].getChildren().stash()
+            # TODO: dirty fix, do this better
+            if self.head.getNumChildren() > 1:
+                self.head.getChildren().stash()
+            else:
+                self.head.getChildren()[0].getChildren().stash()
             if head.keepParts is not None:
                 for part in head.keepParts:
                     partNode: NodePath = self.head.find(f"**/{part};+s")
