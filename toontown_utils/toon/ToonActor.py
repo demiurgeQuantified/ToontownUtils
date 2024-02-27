@@ -12,6 +12,16 @@ from toontown_utils.toon.ToonHead import ToonHead, Eyelashes
 class ToonActor(Actor):
     def __init__(self, species: ToonSpecies | str, head: str | ToonHead, torso: str | ToonPart, legs: ToonPart | str,
                  clothingType: str = "skirt", eyelashes: bool = False) -> None:
+        """
+        ToonActor class
+
+        :param species: The species of the toon
+        :param head: The toon's head type
+        :param torso: The toon's torso type
+        :param legs: The toon's legs type
+        :param clothingType: The toon's clothing type ("shorts", "skirt")
+        :param eyelashes: Whether the toon should have eyelashes
+        """
         Actor.__init__(self)
         if isinstance(species, str):
             species = TemplateManager.Species[species]
@@ -37,12 +47,28 @@ class ToonActor(Actor):
         self.createModel(species, self.headType, self.torsoType, self.legsType, eyelashes)
 
     def createModel(self, species: ToonSpecies, head: ToonHead, torso: ToonPart, legs: ToonPart, eyelashes: bool) -> None:
+        """
+        Creates the actor's model
+
+        :param species: The species to create
+        :param head: The head type to create
+        :param torso: The torso type to create
+        :param legs: The legs type to create
+        :param eyelashes: Whether to create eyelashes
+        :return:
+        """
         self.createHead(head, eyelashes)
         self.createTorso(torso)
         self.createLegs(legs)
         self.setScale(species.size)
 
     def createLegs(self, legsPart: ToonPart) -> None:
+        """
+        Creates the actor's legs model
+
+        :param legsPart: The legs to create
+        :return:
+        """
         self.loadModel(legsPart.model, "legs")
         self.loadAnims(legsPart.anims, "legs")
         self.legs = self.getPart("legs")
@@ -55,6 +81,12 @@ class ToonActor(Actor):
             self.torso.reparentTo(self.legs.find("**/joint_hips"))
 
     def createTorso(self, torsoPart: ToonPart) -> None:
+        """
+        Creates the actor's torso model
+
+        :param torsoPart: The torso to create
+        :return:
+        """
         self.loadModel(torsoPart.model, "torso")
         self.loadAnims(torsoPart.anims, "torso")
         self.torso = self.getPart("torso")
@@ -65,6 +97,13 @@ class ToonActor(Actor):
             self.head.reparentTo(self.torso.find("**/def_head"))
 
     def createHead(self, head: ToonHead, eyelashes: bool = False) -> None:
+        """
+        Creates the actor's head model
+
+        :param head: The head to create
+        :param eyelashes: Whether to create eyelashes
+        :return:
+        """
         # TODO: maybe remove nodes instead of stashing them
         self.loadModel(head.model, "head")
         if head.anims is not None:
@@ -105,6 +144,12 @@ class ToonActor(Actor):
             self.head.reparentTo(self.torso.find("**/def_head"))
 
     def createEyelashes(self, lashes: Eyelashes) -> None:
+        """
+        Creates an eyelash model for the actor
+
+        :param lashes: The eyelashes to create
+        :return:
+        """
         if lashes.model:
             eyelashes = loader.loadModel(lashes.model)
             eyelashes.getChildren()[0].getChildren().stash()
@@ -114,6 +159,12 @@ class ToonActor(Actor):
             self.head.find(f"**/{lashes.closed};+s").stash()
 
     def createMuzzles(self, head: ToonHead) -> None:
+        """
+        Fills the actor's muzzle dictionary
+
+        :param head: The head to read muzzle definitions from
+        :return:
+        """
         self.muzzles = {}
         if head.muzzles is not None:
             for muzzle, part in head.muzzles.items():
@@ -132,24 +183,54 @@ class ToonActor(Actor):
         self.muzzles["neutral"].unstash()
 
     def showMuzzle(self, muzzle: str) -> None:
+        """
+        Shows the muzzle with the given name, hiding all others
+
+        :param muzzle: The muzzle to show
+        :return:
+        """
         for node in self.muzzles.values():
             node.stash()
         self.muzzles[muzzle].unstash()
 
     def setEyesTexture(self, tex: Texture) -> None:
+        """
+        Sets the eyes texture
+
+        :param tex: The texture to set
+        :return:
+        """
         self.head.find(f"**/{self.headType.eyes}").setTexture(tex, 1)
 
     def setLegsColor(self, color: Vec4) -> None:
+        """
+        Sets the colour of the actor's legs
+
+        :param color: The colour to set
+        :return:
+        """
         for pieceName in ("legs", "feet"):
             piece = self.legs.find(f"**/{pieceName}")
             piece.setColor(color)
 
     def setTorsoColor(self, color: Vec4) -> None:
+        """
+        Sets the colour of the actor's torso
+
+        :param color: The colour to set
+        :return:
+        """
         for pieceName in ("arms", "neck"):
             piece = self.torso.find(f"**/{pieceName}")
             piece.setColor(color)
 
     def setHeadColor(self, color: Vec4) -> None:
+        """
+        Sets the colour of the actor's head
+
+        :param color: The colour to set
+        :return:
+        """
         for partName in self.headType.colorParts:
             part: NodePath = self.head.find(f"**/{partName}")
             if part.isEmpty():
@@ -157,29 +238,65 @@ class ToonActor(Actor):
             part.setColor(color)
 
     def setGlovesColor(self, color: Vec4) -> None:
+        """
+        Sets the colour of the actor's gloves
+
+        :param color: The colour to set
+        :return:
+        """
         gloves = self.torso.find("**/hands")
         gloves.setColor(color)
 
     def setTopColor(self, color: Vec4) -> None:
+        """
+        Sets the colour of the actor's top/shirt
+
+        :param color: The colour to set
+        :return:
+        """
         for pieceName in ("torso-top", "sleeves"):
             piece = self.legs.find(f"**/{pieceName}")
             piece.setColor(color)
 
     def setBottomColor(self, color: Vec4) -> None:
+        """
+        Sets the colour of the actor's bottoms/shorts/skirt
+
+        :param color: The colour to set
+        :return:
+        """
         piece = self.legs.find("**/torso-bot")
         piece.setColor(color)
 
     def setBottomTexture(self, tex: Texture | str) -> None:
+        """
+        Sets the texture of the actor's bottoms/shorts/skirt
+
+        :param tex: The texture to set
+        :return:
+        """
         if not isinstance(tex, Texture):
             tex = loader.loadTexture(tex)
         self.torso.find("**/torso-bot").setTexture(tex, 1)
 
     def setTopTexture(self, tex: Texture | str) -> None:
+        """
+        Sets the texture of the main piece of the actor's top/shirt
+
+        :param tex: The texture to set
+        :return:
+        """
         if not isinstance(tex, Texture):
             tex = loader.loadTexture(tex)
         self.torso.find("**/torso-top").setTexture(tex, 1)
 
     def setSleeveTexture(self, tex: Texture | str) -> None:
+        """
+        Sets the texture of the actor's sleeves
+
+        :param tex: The texture to set
+        :return:
+        """
         if not isinstance(tex, Texture):
             tex = loader.loadTexture(tex)
         self.torso.find("**/sleeves").setTexture(tex, 1)
