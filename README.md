@@ -11,18 +11,19 @@ now only takes a few lines of code, and manipulating them can be done with simpl
 Though optional, Toontown Utils is primarily intended for use with
 [ToontownJSON](https://github.com/demiurgeQuantified/ToontownJSON). ToontownJSON provides data on the vanilla cogs and
 toon parts. Its schema can also be used to add custom cogs, species and body parts.
+
 ```python
 from toontown_utils import TemplateManager
 from toontown_utils.cog.CogActor import CogActor
 from toontown_utils.toon.ToonActor import ToonActor
 
-TemplateManager.loadFile("cog.json")
+TemplateManager.readFile("cog.json")
 
 cog = CogActor(cogType="ColdCaller")
 cog.reparentTo(render)
 cog.loop("neutral")
 
-TemplateManager.loadFile("toon.json")
+TemplateManager.readFile("toon.json")
 
 toon = ToonActor(species="cat", head="ls", torso="m", legs="s", clothingType="skirt", eyelashes=True)
 toon.reparentTo(render)

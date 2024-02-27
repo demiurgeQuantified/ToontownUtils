@@ -17,36 +17,51 @@ Torsos = ToonLoader.Torsos
 Species = ToonLoader.Species
 
 
-def getLegs(type: str, clothingType: str) -> ToonPart:
+def getLegs(type: str, clothingType: str = "all") -> ToonPart:
+    """
+    Gets a legs definition by its name
+
+    :param type: Name of the part
+    :param clothingType: Type of clothing (shorts/skirt)
+    :return:
+    """
     try:
         return Legs[clothingType][type]
     except KeyError:
+        # this just does the same thing twice if all was originally passed
         return Legs["all"][type]
 
 
-def getTorso(type: str, clothingType: str) -> ToonPart:
+def getTorso(type: str, clothingType: str = "all") -> ToonPart:
+    """
+    Gets a torso definition by its name
+
+    :param type: Name of the part
+    :param clothingType: Type of clothing (shorts/skirt)
+    :return:
+    """
     try:
         return Torsos[clothingType][type]
     except KeyError:
         return Torsos["all"][type]
 
 
-def loadFile(path: str, schema: str = None) -> bool:
-    try:
-        file = open(path, 'r', encoding='utf-8')
-    except OSError:
-        print(f"TemplateManager ERROR: Failed to open {path}")
-        return False
+def readFile(path: str, schema: str = None):
+    """
+    Reads a ToontownJSON file and loads definitions from it
+
+    :param path: The path of file to read
+    :param schema: Valid values are 'toon' and 'cog'
+    :return:
+    """
+    file = open(path, 'r', encoding='utf-8')
 
     try:
         contents: dict = json.loads(file.read())
-    except json.JSONDecodeError:
+    finally:
         file.close()
-        print(f"TemplateManager ERROR: {path} is not a valid JSON file.")
-        return False
 
-    file.close()
-
+    # TODO: i don't really like the way i did this, toons and cogs should just use the same schema
     if schema is None:
         schema = contents.get("$schema")
         if schema == "toonschema.json":
@@ -54,12 +69,9 @@ def loadFile(path: str, schema: str = None) -> bool:
         elif schema == "cogschema.json":
             schema = "cog"
         else:
-            print(f"TemplateManager ERROR: Could not auto-detect schema of {path}")
-            return False
+            raise Exception(f"Could not auto-detect schema of {path}")
 
     if schema == "toon":
         ToonLoader.readFile(contents)
     elif schema == "cog":
-        CogLoader.readFile(contents)
-
-    return True
+        CogLoader.loadFromJson(contents)
