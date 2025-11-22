@@ -1,3 +1,5 @@
+> [!WARNING]
+> This project has been archived and will not see any further development. I do still see a use for something like this, but with more experience I now see fundamental issues with the approach and style used in these projects.
 # Toontown Utils
 A package for Panda3D that streamlines the usage of Toontown Online assets, so that fan projects (games, videos, etc)
 can easily use them.
